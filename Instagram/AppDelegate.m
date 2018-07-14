@@ -7,6 +7,8 @@
 //
 
 #import "AppDelegate.h"
+#import <Parse/Parse.h>
+#import "LoginViewController.h"
 
 @interface AppDelegate ()
 
@@ -17,7 +19,35 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     // Override point for customization after application launch.
+    ParseClientConfiguration *config = [ParseClientConfiguration   configurationWithBlock:^(id<ParseMutableClientConfiguration> configuration) {
+        
+        configuration.applicationId = @"myAppId";
+        configuration.clientKey = @"myMasterKey";
+        configuration.server = @"http://kimorasinstagram.herokuapp.com/parse";
+    }];
+    
+    [Parse initializeWithConfiguration:config];
+    
+    if (PFUser.currentUser) {
+        UIStoryboard *storyboard = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
+        
+        self.window.rootViewController = [storyboard instantiateViewControllerWithIdentifier:@"Tabbar"];
+    }
+    
     return YES;
+}
+
+- (void)logout {
+    [PFUser logOutInBackgroundWithBlock:^(NSError * _Nullable error) {
+        if (error) {
+            NSLog(@"%@", error.localizedDescription);
+        }else{
+            AppDelegate *appDelegate = (AppDelegate *)[UIApplication sharedApplication].delegate;
+            UIStoryboard *storyboard = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
+            LoginViewController *loginViewController = [storyboard instantiateViewControllerWithIdentifier:@"LoginViewController"];
+            appDelegate.window.rootViewController = loginViewController;
+        }
+    }];
 }
 
 
